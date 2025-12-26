@@ -1,14 +1,19 @@
 from flask import Flask, render_template, session
 from flask_wtf import CSRFProtect
+from dotenv import load_dotenv
+import os
 
+load_dotenv('.env')
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 csrf = CSRFProtect(app)
+
 
 
 @app.route('/')
 def index():
-    pass
+    return render_template('index.html', title='Get a Word a Day')
 
 @app.route('/register')
 def registration():
@@ -48,6 +53,10 @@ def bookmark_word():
 
 @app.route('/signout')
 def signout():
+    pass
+    
+@app.route('/api/documentation')
+def docs():
     pass
 
 @app.route('/api/words/<letter>')
