@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block content %}
+<main id="documentation">
+  <h2>Documentation</h2>
+  <section>
+    <h3>/api/words/&lt;letter&gt;</h3>
+     <p>Get words that begin with a certain letter</p>
+     <div class="example">
+      <p>Example</p>
+      <p class="url">/api/words/b</p>
+     </div>
+     <div class="result">
+      <p>JSON</p>
+      <p class="json">
+          [{
+            word" : "barrack", 
+            "phonetic" : "/ˈbæ.ɹək/", 
+            "audio" : "https://api.dictionaryapi.dev/media/pronunciations/en/barrack-au.mp3",
+            "meanings":[{
+                "partOfSpeech":"noun",
+                "definitions":[{
+                    "definition":"(chiefly in the plural) A building for soldiers, especially within a garrison; originally referred to temporary huts, now usually to a permanent structure or set of buildings.",
+                    "synonyms":[],
+                },
+                { 
+                   "definition":"(chiefly in the plural) primitive structure resembling a long shed or barn for (usually temporary) housing or other purposes",
+                   "synonyms":[]
+                },
+                {
+                  "definition":"A movable roof sliding on four posts, to cover hay, straw, etc.",
+                  "synonyms":[]
+                }]  
+              }]
+            },
+            {
+            word" : "benevolent", 
+            "phonetic" : "/bəˈnɛvələnt/", 
+            "audio" : "",
+            "meanings":[{
+                "partOfSpeech":"adjective",
+                "definitions":[{
+                    "definition":"Having a disposition to do good.",
+                    "synonyms":[],
+                    "example":"Chinese and Eastern mythologies describe dragons as benevolent."
+                },
+                { 
+                   "definition":"Possessing or manifesting love for mankind.",
+                   "synonyms":[]
+                },
+                {
+                  "definition":"Altruistic, charitable, good, just and fair.",
+                  "synonyms":[]
+                }]  
+              }]
+          }]
+        <span>...</span>
+     </p>
+     </div>
+  </section>
+  <section>
+    <h3>/api/search/&lt;word&gt;</h3>
+     <p>Get the definition of a word</p>
+     <div class="example">
+      <p>Example</p>
+      <p class="url">/api/search/vitality</p>
+     </div>
+     <div class="result">
+      <p>JSON</p>
+      <p class="json">
+          [{
+            word" : "vitality", 
+            "phonetic" : "/vaɪˈtæləti/", 
+            "audio" : "",
+            "meanings":[{
+                "partOfSpeech":"noun",
+                "definitions":[{
+                    "definition":"The capacity to live and develop.",
+                    "synonyms":[],
+                },
+                { 
+                   "definition":"Energy or vigour.",
+                   "synonyms":[]
+                },
+                {
+                  "definition":"That which distinguishes living from nonliving things; life, animateness.",
+                  "synonyms":[]
+                }]  
+            }]
+        }]
+     </p>
+     </div>
+  </section>
+  <section>
+    <h3>/api/random/word</h3>
+     <p>Get the definition of a random word</p>
+     <div class="example">
+      <p>Example</p>
+      <p class="url">/api/random/word</p>
+     </div>
+     <div class="result">
+      <p>JSON</p>
+      <p class="json">
+          [{
+            word" : "effulgent", 
+            "phonetic" : "/ɪˈfʌldʒənt/", 
+            "audio" : "https://api.dictionaryapi.dev/media/pronunciations/en/effulgent-uk.mp3",
+            "meanings":[{
+                "partOfSpeech":"adjective",
+                "definitions":[{
+                    "definition":""Radiant, resplendent, shining.",
+                    "synonyms":["profulgent"],
+                }]
+            }]
+        }]
+     </p>
+     </div>
+  </section>
+    <section>
+    <h3>/api/synonyms/&lt;word&gt;</h3>
+     <p>Get the synonyms of a particular word</p>
+     <div class="example">
+      <p>Example</p>
+      <p class="url">/api/synonyms/broken</p>
+     </div>
+     <div class="result">
+      <p>JSON</p>
+      <p class="json">
+          [{
+            word" : "broken", 
+            "synonyms":[
+                "crack",
+                "fracture",
+                "burst",
+                "bust",
+                "shatter",
+                "shear",
+                "smash",
+                "split",
+                "break down",
+                "bust",
+                "fail",
+                "go down",
+                "contravene",
+                go against",
+                "violate",
+                "break in",
+                "subject",
+                "tame"
+            ]     
+          }]
+     </p>
+     </div>
+  </section>
+</main>
+{% endblock %}
+
+
+

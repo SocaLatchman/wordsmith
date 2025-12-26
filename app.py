@@ -27,7 +27,7 @@ class Wordbank(SQLModel, table=True):
     word: str
     phonetic: str
     meanings: List[str] = Field(sa_column=Column(JSON))
-    audio: str
+    audio: str = Field(default=None)
     user_id: int
     date_added: datetime
 
@@ -78,7 +78,7 @@ def signout():
     
 @app.route('/api/documentation')
 def docs():
-    pass
+    return render_template('documentation.html', title='Documentation')
 
 @app.route('/api/words/<letter>')
 def letter():
