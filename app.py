@@ -1,10 +1,6 @@
 from flask import Flask, render_template, session
 from flask_wtf import CSRFProtect
 from dotenv import load_dotenv
-from sqlmodel import Field, SQLModel, Session, Column, JSON, create_engine
-from typing import List, Dict
-from flask_mail import Mail, Message
-from datetime import datetime
 import os
 
 load_dotenv('.env')
@@ -13,23 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 csrf = CSRFProtect(app)
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 
-class User(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    fullname: str
-    email: str 
-    date_created : datetime
-    last_active: datetime
-
-class Wordbank(SQLModel, table=True):
-    word_id: int = Field(default=None, primary_key=True)
-    word: str
-    phonetic: str
-    meanings: List[str] = Field(sa_column=Column(JSON))
-    audio: str
-    user_id: int
-    date_added: datetime
 
 
 @app.route('/')
