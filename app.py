@@ -46,7 +46,7 @@ def registration_passcode():
 
 @app.route('/signin')
 def signin():
-    pass
+    return render_template('signin.html', title='Sign in')
 
 @app.route('/signin/passcode')
 def signin_passcode():
