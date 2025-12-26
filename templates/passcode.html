@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<main id="passcode">
+   <form method="POST">
+   {% if request.endpoint == 'registration_passcode' %} 
+     <h3>Register</h3>
+  {% endif %}   
+  {% if request.endpoint == 'signin_passcode' %}
+     <h3>Sign in</h3>
+  {% endif %}
+     <p>A passcode was sent to your e-mail please enter the passcode below</p>
+     <input type="text" name="passcode" placeholder="0CFX5649">
+     <input type="submit" name="submit" value="Finish">
+  </form>
+</main>
+{% endblock %}

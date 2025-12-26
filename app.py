@@ -38,11 +38,11 @@ def index():
 
 @app.route('/register')
 def registration():
-    return render_template('register.html', title='registration')
+    return render_template('register.html', title='Registration')
 
 @app.route('/register/passcode')
 def registration_passcode():
-    pass
+    return render_template('passcode.html', title='Passcode')
 
 @app.route('/signin')
 def signin():
@@ -50,7 +50,7 @@ def signin():
 
 @app.route('/signin/passcode')
 def signin_passcode():
-    pass
+    return render_template('passcode.html', title='Passcode')
 
 @app.route('/email/passcode')
 def send_passcode():
