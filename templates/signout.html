@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<main id="signin">
+  <form method="POST">
+     <h3>You&apos;re signed out</h3>
+     <p>If you would like to sign back in <span><a href="{{ url_for('signin') }}">click here</a></span></p>
+  </form>
+</main>
+{% endblock %}

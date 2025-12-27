@@ -74,7 +74,7 @@ def bookmark_word():
 
 @app.route('/signout')
 def signout():
-    pass
+    return render_template('signout.html')
     
 @app.route('/api/documentation')
 def docs():
