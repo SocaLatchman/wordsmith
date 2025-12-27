@@ -1,10 +1,11 @@
-from flask import Flask, render_template, session
+from flask import Flask, render_template, session, request
 from flask_wtf import CSRFProtect
 from typing import List
 from sqlmodel import Field, SQLModel, Column, JSON, create_engine
 from dotenv import load_dotenv
 from flask_mail import Mail, Message
 from datetime import datetime
+import requests
 import os
 
 load_dotenv('.env')
@@ -12,6 +13,7 @@ load_dotenv('.env')
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+app.config['DICTIONARY_API'] = os.environ.get('DICTIONARY_API')
 csrf = CSRFProtect(app)
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 
@@ -30,6 +32,11 @@ class Wordbank(SQLModel, table=True):
     audio: str = Field(default=None)
     user_id: int
     date_added: datetime
+
+    def get_word(word):
+       return requests.get(f"{app.config['DICTIONARY_API']}/{word}")
+
+
 
 
 @app.route('/')
@@ -85,8 +92,9 @@ def letter():
     pass
 
 @app.route('/api/search/<word>')
-def word_search():
-    pass
+def word_search(word):
+    dictionary_result = Wordbank.get_word(word)
+    return dictionary_result.json()
 
 @app.route('/api/random/word')
 def random_word():
