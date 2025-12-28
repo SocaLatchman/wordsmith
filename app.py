@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 from flask_mail import Mail, Message
 from datetime import datetime
 from redis import Redis
-from tasks import *
-import threading
+import requests
 import random
 import os
 import sys
@@ -51,10 +50,17 @@ class Wordbank(SQLModel, table=True):
         random_word = random.choice(words)
         word = Wordbank.get_word(random_word)
         return word.json()
-
-
-      
-        
+    
+    def get_synonyms(word):
+        word_definition = Wordbank.get_word(word)
+        word_data = word_definition.json()
+        for result in word_data:
+                for item in result['meanings']:
+                    for word in item['definitions']:
+                        if len(word['synonyms']) == 0:
+                            return 'Unable to find the word provided'
+                        else:
+                            return word['synonyms']
 
 @app.route('/')
 def index():
@@ -122,11 +128,10 @@ def randomize():
     else:
         return random_word
 
-
-
 @app.route('/api/synonyms/<word>')
-def synonyms():
-    pass
+def synonyms(word):
+    synonym = Wordbank.get_synonyms(word)
+    return synonym
 
 
 if __name__ == '__main__':
