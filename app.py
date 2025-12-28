@@ -1,20 +1,27 @@
-from flask import Flask, render_template, session, request
+from flask import Flask, render_template, session, request, url_for, redirect, jsonify
 from flask_wtf import CSRFProtect
 from typing import List
 from sqlmodel import Field, SQLModel, Column, JSON, create_engine
 from dotenv import load_dotenv
 from flask_mail import Mail, Message
 from datetime import datetime
-import requests
+from redis import Redis
+from tasks import *
+import threading
+import random
 import os
+import sys
+import json
+import time
 
 load_dotenv('.env')
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 app.config['DICTIONARY_API'] = os.environ.get('DICTIONARY_API')
+app.config['REDIS_URL'] = os.environ.get('REDIS_URL')
 csrf = CSRFProtect(app)
+
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 
 class User(SQLModel, table=True):
@@ -34,10 +41,20 @@ class Wordbank(SQLModel, table=True):
     date_added: datetime
 
     def get_word(word):
-       return requests.get(f"{app.config['DICTIONARY_API']}/{word}")
+        return requests.get(f"{app.config['DICTIONARY_API']}/{word}")   
+
+    def random_word():
+        words = []
+        with open('words.txt', 'r') as file:
+            for line in file:
+                words.append(line.rstrip())
+        random_word = random.choice(words)
+        word = Wordbank.get_word(random_word)
+        return word.json()
 
 
-
+      
+        
 
 @app.route('/')
 def index():
@@ -97,8 +114,15 @@ def word_search(word):
     return dictionary_result.json()
 
 @app.route('/api/random/word')
-def random_word():
-    pass
+def randomize():
+    random_word = Wordbank.random_word()
+    if isinstance(random_word, dict):
+        time.sleep(0.5)
+        return redirect(url_for('randomize'))
+    else:
+        return random_word
+
+
 
 @app.route('/api/synonyms/<word>')
 def synonyms():
