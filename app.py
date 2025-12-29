@@ -2,7 +2,7 @@ from flask import Flask, render_template, session, request, url_for, redirect, j
 from flask_wtf import CSRFProtect
 from typing import List
 from sqlmodel import Field, SQLModel, Column, JSON, create_engine
-from apscheduler.schedulers.background import BackgroundScheduler
+from flask_apscheduler import APScheduler
 from email_validator import validate_email, EmailNotValidError
 from flask_session import Session
 from dotenv import load_dotenv
@@ -34,11 +34,13 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'wordsmith_session:'
 app.config['SESSION_REDIS'] = os.environ.get('REDIS_URL')
-scheduler = BackgroundScheduler()
+scheduler = APScheduler()
 csrf = CSRFProtect(app)
 mail = Mail(app)
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 Session(app)
+
+
 
 def generate_passcode():
     return ''.join(secrets.choice(string.digits) for i in range(8))
@@ -95,8 +97,23 @@ class Wordbank(SQLModel, table=True):
                         else:
                             return word['synonyms']
 
-    def send_word(email):
-        pass
+
+    def send_word(emails, word):
+        with app.app_context():
+            for email in emails:
+                try:
+                    wotd = EmailMultiAlternatives(
+                        subject='Word of The Day', 
+                        body=render_template('wotd.txt', wotd=word),
+                        from_email=app.config['MAIL_USERNAME'], 
+                        to=[email]
+                    )
+                    wotd.attach_alternative(render_template('wotd.html', wotd=word), 'text/html')
+                    wotd.send()
+                    print('e-mail sent')
+                except Exception as e:
+                    return f'error: {str(e)}'
+
 
 
 @app.route('/')
@@ -123,6 +140,10 @@ def signin_passcode():
 def send_passcode():
     send = User.send_passcode('abstractblk@gmail.com')
     return {'success' : 200}
+
+@app.route('/email/wotd')
+def send_wotd():
+    pass
 
 @app.route('/wordbank')
 def wordbank():
@@ -167,7 +188,11 @@ def synonyms(word):
     synonym = Wordbank.get_synonyms(word)
     return synonym
 
+
+def test_send():
+    print('Hello from a cron job!!')
+
 if __name__ == '__main__':
-    #scheduler.add_job(Wordbank.send_word, 'cron', hour=10, minute=00, name='Word of the Day')
-    #scheduler.start()
-    app.run(debug=True)
+    scheduler.add_job(id='wotd-job', func=Wordbank.send_word, trigger='cron', day_of_week='*', hour=10, minute=30, misfire_grace_time=3600)
+    scheduler.start()
+    app.run(debug=True, use_reloader=False)

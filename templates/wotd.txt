@@ -1,0 +1,5 @@
+The Word of the Day is: {{ wotd['word'] }}
+{{ wotd['pronunciation']}}
+{% for definition in wotd['definitions'] %}
+  {{ loop.index }}.{{ definition }}
+{% endfor %}
