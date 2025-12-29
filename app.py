@@ -40,12 +40,26 @@ mail = Mail(app)
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 Session(app)
 
+class EmailSender:
+    def send_email():
+        pass
 
-def send_email():
-    pass
-
-def generate_passcode():
-    return ''.join(secrets.choice(string.digits) for i in range(8))
+class Passcode:
+    def generate_passcode():
+        return ''.join(secrets.choice(string.digits) for i in range(8))
+    
+    def send_passcode(email):
+        try:
+            wotd = EmailMultiAlternatives(
+                subject='Passcode', 
+                body=render_template('email.txt', passcode=PasscodeGenerator.generate_passcode()),
+                from_email=app.config['MAIL_USERNAME'], 
+                to=[email]
+            )
+            wotd.attach_alternative(render_template('email.html', passcode=PasscodeGenerator.generate_passcode()), 'text/html')
+            wotd.send()
+        except Exception as e:
+            return f'error: {str(e)}'
 
 class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
@@ -57,18 +71,7 @@ class User(SQLModel, table=True):
     def get_subscribers():
         pass
 
-    def send_passcode(email):
-        try:
-             wotd = EmailMultiAlternatives(
-                subject='Passcode', 
-                body=render_template('email.txt', passcode=generate_passcode()),
-                from_email=app.config['MAIL_USERNAME'], 
-                to=[email]
-             )
-             wotd.attach_alternative(render_template('email.html', passcode=generate_passcode()), 'text/html')
-             wotd.send()
-        except Exception as e:
-             return f'error: {str(e)}'
+
 
 class Wordbank(SQLModel, table=True):
     word_id: int = Field(default=None, primary_key=True)
