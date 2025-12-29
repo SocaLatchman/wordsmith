@@ -5,10 +5,12 @@ from sqlmodel import Field, SQLModel, Column, JSON, create_engine
 from apscheduler.schedulers.background import BackgroundScheduler
 from email_validator import validate_email, EmailNotValidError
 from dotenv import load_dotenv
-from flask_mailman import EmailMessage, Mail, EmailMultiAlternatives
+from flask_mailman import Mail, EmailMultiAlternatives
 from datetime import datetime
 from redis import Redis
 import requests
+import string
+import secrets
 import random
 import os
 import sys
@@ -32,6 +34,9 @@ csrf = CSRFProtect(app)
 mail = Mail(app)
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 
+def generate_passcode():
+    return ''.join(secrets.choice(string.digits) for i in range(8))
+
 class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     fullname: str = Field(default='anonymous')
@@ -43,11 +48,11 @@ class User(SQLModel, table=True):
         try:
              wotd = EmailMultiAlternatives(
                 subject='Passcode', 
-                body=render_template('email.txt', passcode=''),
+                body=render_template('email.txt', passcode=generate_passcode()),
                 from_email=app.config['MAIL_USERNAME'], 
                 to=[email]
              )
-             wotd.attach_alternative(render_template('email.html', passcode=''), 'text/html')
+             wotd.attach_alternative(render_template('email.html', passcode=generate_passcode()), 'text/html')
              wotd.send()
              return 'Message sent'
         except Exception as e:
