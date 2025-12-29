@@ -8,6 +8,7 @@
       <style>
       </style>
    </head>
+   {% if request.endpoint == 'send_passcode' %}
    <body style="padding:0; margin:0; -webkit-text-size-adjust: none; text-size-adjust: none; background-color: #cccccc;">
      <div lang="en" style="width:100%; max-width:640px;margin: 0 auto; background-color: #F2F1EF;">
         <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
@@ -69,4 +70,75 @@
 
 
    </body>
+   {% endif %}
+   {% if request.endpoint == 'send_wotf' %}
+   <body style="padding:0; margin:0; -webkit-text-size-adjust: none; text-size-adjust: none; background-color: #cccccc;">
+     <div lang="en" style="width:100%; max-width:640px;margin: 0 auto; background-color: #F2F1EF;">
+        <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
+            <tr>
+              <td>
+                <div style="width:100%; max-width: 640px; margin: 0 auto;">
+                    <table border="0" cellpading="0" cellspacing="0" role="presentation" style="width: 100%; padding: 25px 0;background-color: #EFCF79; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.2)">
+                        <tr style="font: 900 18px Source Code Pro, courier, monospace;">
+                           <td>
+                             <a href="https://www.example.com" style="text-decoration: none;color: #000000;"><b>WORDSMITH</b></a>
+                           </td> 
+                        </tr>
+                    </table>
+                </div>
+                <div style="width: 75.5%; max-width: 640px; margin: 0 auto; padding: 50px 0;">
+                   <table border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
+                      <tr>
+                        <td>
+                           <div class="card-content" style="border-radius: 20px; background-color: #ffffff; padding: 35px 50px;filter:drop-shadow(2px 2px 3px rgba(0,0,0,0.2));">
+                             <h3 style="font: 900 16px/18px Source Code Pro, courier, monospace;">Word of the day is</h3>
+                             <p style="font: 900 16px/18px Source Code Pro, courier, monospace;background-color:rgb(239, 207, 121, 0.8);display: inline-block;">{{ wotd }}</p>
+                             <p style="font: 400 12px/14px Source Code Pro, courier, monospace;">{{ pronunciation }}</p>
+                             <ul style="margin-left: -40px;">
+                                {% for definition in definitions %}
+                                <li style="display:inline-block; list-style-type: none; font: 600 10px Source Code Pro, courier, monospace">{{ loopindex }}.{{ definition }}</li>
+                                {% endfor %}
+                             </ul>
+                           </div> 
+                        </td>
+                      </tr>
+                   </table> 
+                </div>
+                <div style="background-color: #ffffff; width: 100%; max-width: 640px; margin: 0 auto; text-align: center;">
+                  <table border="0" cellpadding="0" cellspacing="0" align="center" role="presentation" style="width: 100%; border-top: 1px solid rgba(0,0,0,0.1);">
+                    <tr align="center">
+                      <td>
+                        <ul>
+                          <li style="display:inline; list-style-type: none; padding-right: 35px;"><a href="https://www.example.com"><img src="https://lh3.googleusercontent.com/d/1wsVKQFKWEScRmP8NMzbrMj3s3yjIp1ZV" alt="twitter" width="24" height="24"></a></li>  
+                          <li style="display:inline; list-style-type: none; padding-right: 35px;"><a href="https://www.example.com"><img src="https://lh3.googleusercontent.com/d/1mVv2_YNWAH9WR94vzVQ-FgsMVUnACM97" alt="facebook" width="24" height="24"></a></li>  
+                          <li style="display:inline; list-style-type: none;"><a href="https://www.example.com"><img src="https://lh3.googleusercontent.com/d/1wsVKQFKWEScRmP8NMzbrMj3s3yjIp1ZV" alt="instagram" width="24" height="24"></a></li>  
+                        </ul>
+                      </td>  
+                    </tr>
+                    <tr align="center">
+                       <td>
+                        <ul>
+                          <li style="display:inline-block; list-style-type: none; padding-right: 20px;"><a href="https://www.example.com" style="font: 900 10px/12px Source Code Pro, courier, monospace; color: #000000;">unsubscribe</a></li>  
+                          <li style="display:inline-block; list-style-type: none; padding-right: 20px; font: 900 10px/12px Source Code Pro, courier, monospace; color: #000000;">|</li>  
+                          <li style="display:inline-block; list-style-type: none; font: 900 10px/12px Source Code Pro, courier, monospace; color: #000000;">contact us <a href="https://www.example.com" style="font: 900 10px/12px Source Code Pro, courier, monospace; color: #000000;"><span>wotf@wordsmith.co</span></a></li>  
+                        </ul> 
+                       </td> 
+                    </tr>
+                    <tr align="center">
+                      <td>
+                        <p style="font: 400 10px/12px Source Code Pro, courier, monospace;text-align: center;">All rights reserved</p>
+                      </td>  
+                    </tr>
+                  </table>
+                </div>
+              </td>  
+            </tr>
+        </table>
+     </div>
+
+
+   </body>
+
+
+   {% endif %}
  </html>

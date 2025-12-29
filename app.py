@@ -4,6 +4,7 @@ from typing import List
 from sqlmodel import Field, SQLModel, Column, JSON, create_engine
 from apscheduler.schedulers.background import BackgroundScheduler
 from email_validator import validate_email, EmailNotValidError
+from flask_session import Session
 from dotenv import load_dotenv
 from flask_mailman import Mail, EmailMultiAlternatives
 from datetime import datetime
@@ -13,7 +14,6 @@ import string
 import secrets
 import random
 import os
-import sys
 import json
 import time
 
@@ -29,10 +29,16 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 app.config['DICTIONARY_API'] = os.environ.get('DICTIONARY_API')
 app.config['REDIS_URL'] = os.environ.get('REDIS_URL')
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_KEY_PREFIX'] = 'wordsmith_session:'
+app.config['SESSION_REDIS'] = os.environ.get('REDIS_URL')
 scheduler = BackgroundScheduler()
 csrf = CSRFProtect(app)
 mail = Mail(app)
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+Session(app)
 
 def generate_passcode():
     return ''.join(secrets.choice(string.digits) for i in range(8))
@@ -54,7 +60,6 @@ class User(SQLModel, table=True):
              )
              wotd.attach_alternative(render_template('email.html', passcode=generate_passcode()), 'text/html')
              wotd.send()
-             return 'Message sent'
         except Exception as e:
              return f'error: {str(e)}'
 
