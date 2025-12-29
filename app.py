@@ -41,6 +41,8 @@ engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
 Session(app)
 
 
+def send_email():
+    pass
 
 def generate_passcode():
     return ''.join(secrets.choice(string.digits) for i in range(8))
@@ -51,6 +53,9 @@ class User(SQLModel, table=True):
     email: str  = Field(unique=True)
     date_created : datetime
     last_active: datetime
+
+    def get_subscribers():
+        pass
 
     def send_passcode(email):
         try:
@@ -77,6 +82,20 @@ class Wordbank(SQLModel, table=True):
     def get_word(word):
         return requests.get(f"{app.config['DICTIONARY_API']}/{word}")   
 
+    def new_word():
+        '''Return a word that has not been sent to the user'''
+        pass
+
+    def check_words(word):
+        '''Check db for word and if it doesnt exist in db return it. 
+           Otherwise, run random_word() again 
+        '''
+        pass
+
+    def save_word(word):
+        '''Save word to db'''
+        pass
+
     def random_word():
         words = []
         with open('words.txt', 'r') as file:
@@ -98,8 +117,10 @@ class Wordbank(SQLModel, table=True):
                             return word['synonyms']
 
 
-    def send_word(emails, word):
+    def send_word():
         with app.app_context():
+            emails = User.get_subscribers()
+            word = Wordbank.new_word()
             for email in emails:
                 try:
                     wotd = EmailMultiAlternatives(
@@ -187,10 +208,6 @@ def randomize():
 def synonyms(word):
     synonym = Wordbank.get_synonyms(word)
     return synonym
-
-
-def test_send():
-    print('Hello from a cron job!!')
 
 if __name__ == '__main__':
     scheduler.add_job(id='wotd-job', func=Wordbank.send_word, trigger='cron', day_of_week='*', hour=10, minute=30, misfire_grace_time=3600)
