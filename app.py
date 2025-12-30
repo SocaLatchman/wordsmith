@@ -103,6 +103,11 @@ class User(SQLModel, table=True):
                 return 'User saved', 200 
         except Exception as e:
             return f'Unable to save user: {e}', 400
+    
+    def create_session(passcode_key, passcode_email):
+        user_session = passcode_email
+        redis.delete(passcode_key)
+        return user_session
 
 
 class Wordbank(SQLModel, table=True):
