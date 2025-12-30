@@ -39,7 +39,9 @@ scheduler = APScheduler()
 csrf = CSRFProtect(app)
 mail = Mail(app)
 db_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+redis = Redis.from_url(app.config['REDIS_URL'], decode_responses=True)
 FlaskSession(app)
+
 
 class EmailSender:
     def send_email():
@@ -53,11 +55,11 @@ class Passcode:
         try:
             wotd = EmailMultiAlternatives(
                 subject='Passcode', 
-                body=render_template('email.txt', passcode=PasscodeGenerator.generate_passcode()),
+                body=render_template('email.txt', passcode=Passcode.generate_passcode()),
                 from_email=app.config['MAIL_USERNAME'], 
                 to=[email]
             )
-            wotd.attach_alternative(render_template('email.html', passcode=PasscodeGenerator.generate_passcode()), 'text/html')
+            wotd.attach_alternative(render_template('email.html', passcode=Passcode.generate_passcode()), 'text/html')
             wotd.send()
         except Exception as e:
             return f'error: {str(e)}'
@@ -148,7 +150,6 @@ class Wordbank(SQLModel, table=True):
                     return f'error: {str(e)}'
 
 
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -157,12 +158,21 @@ def index():
         user.save_user(db_engine)
     return render_template('index.html', title='Get a Word a Day')
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def registration():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        
+        user = User(fullname=name, email=email)
+        user.save_user(db_engine)
+        user_passcode = Passcode.send_passcode(email)
+
+        return redirect(url_for('registration_passcode'))
     return render_template('register.html', title='Registration')
 
-@app.route('/register/passcode')
-def registration_passcode():
+@app.route('/register/passcode', methods=['POST'])
+def registration_passcode():        
     return render_template('passcode.html', title='Passcode')
 
 @app.route('/signin')
