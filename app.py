@@ -50,6 +50,16 @@ class EmailSender:
 class Passcode:
     def generate_passcode():
         return ''.join(secrets.choice(string.digits) for i in range(8))
+
+    def store_passcode(email):
+        passcode_key = secrets.token_urlsafe(16) 
+        passcode = Passcode.generate_passcode()
+        redis.setex(
+            f'passcode:{passcode_key}',
+            6000,
+            json.dumps({'email' : email, 'passcode' : passcode, 'attempts' : 0})
+        )
+        return passcode_key, passcode
     
     def send_passcode(email):
         try:
@@ -63,6 +73,15 @@ class Passcode:
             wotd.send()
         except Exception as e:
             return f'error: {str(e)}'
+
+    def verify_passcode(passcode_key, passcode):
+        if data := redis.get(f'passcode:{passcode_key}'):
+            passcode_data = json.loads(data)
+            if passcode_data['attempts'] >= 3 ot passcode_data['passcode'] != passcode:
+                return None
+        else:
+            return None
+    
 
 class User(SQLModel, table=True):
     __tablename__ = 'users'
