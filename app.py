@@ -1,10 +1,10 @@
 from flask import Flask, render_template, session, request, url_for, redirect, jsonify
 from flask_wtf import CSRFProtect
-from typing import List
-from sqlmodel import Field, SQLModel, Column, JSON, create_engine
+from typing import List, Optional
+from sqlmodel import Field, SQLModel, Column, JSON, create_engine, Session
 from flask_apscheduler import APScheduler
 from email_validator import validate_email, EmailNotValidError
-from flask_session import Session
+from flask_session import Session as FlaskSession
 from dotenv import load_dotenv
 from flask_mailman import Mail, EmailMultiAlternatives
 from datetime import datetime
@@ -26,6 +26,7 @@ app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS')
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+app.config['MAIL_RECIPIENT'] = os.environ.get('MAIL_RECIPIENT')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 app.config['DICTIONARY_API'] = os.environ.get('DICTIONARY_API')
 app.config['REDIS_URL'] = os.environ.get('REDIS_URL')
@@ -37,8 +38,8 @@ app.config['SESSION_REDIS'] = os.environ.get('REDIS_URL')
 scheduler = APScheduler()
 csrf = CSRFProtect(app)
 mail = Mail(app)
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
-Session(app)
+db_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+FlaskSession(app)
 
 class EmailSender:
     def send_email():
@@ -62,15 +63,25 @@ class Passcode:
             return f'error: {str(e)}'
 
 class User(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+    __tablename__ = 'users'
+    user_id: Optional[int] = Field(default=None, primary_key=True)
     fullname: str = Field(default='anonymous')
     email: str  = Field(unique=True)
-    date_created : datetime
-    last_active: datetime
+    date_created : datetime = Field(default=datetime.now())
+    last_active: datetime = Field(default=datetime.now())
 
     def get_subscribers():
         pass
 
+    def save_user(self, db_engine):
+        try:
+            with Session(db_engine) as session:
+                session.add(self)
+                session.commit()
+                session.close()
+                return 'User saved', 200 
+        except Exception as e:
+            return f'Unable to save user: {e}', 400
 
 
 class Wordbank(SQLModel, table=True):
@@ -118,8 +129,6 @@ class Wordbank(SQLModel, table=True):
                             return 'Unable to find the word provided'
                         else:
                             return word['synonyms']
-
-
     def send_word():
         with app.app_context():
             emails = User.get_subscribers()
@@ -140,8 +149,12 @@ class Wordbank(SQLModel, table=True):
 
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User(email=email)
+        user.save_user(db_engine)
     return render_template('index.html', title='Get a Word a Day')
 
 @app.route('/register')
@@ -162,7 +175,7 @@ def signin_passcode():
 
 @app.route('/email/passcode')
 def send_passcode():
-    send = User.send_passcode('abstractblk@gmail.com')
+    send = Passcode.send_passcode()
     return {'success' : 200}
 
 @app.route('/email/wotd')
@@ -213,6 +226,14 @@ def synonyms(word):
     return synonym
 
 if __name__ == '__main__':
-    scheduler.add_job(id='wotd-job', func=Wordbank.send_word, trigger='cron', day_of_week='*', hour=10, minute=30, misfire_grace_time=3600)
+    scheduler.add_job(
+        id='wotd-job', 
+        func=Wordbank.send_word, 
+        trigger='cron', 
+        day_of_week='*', 
+        hour=10, 
+        minute=30, 
+        misfire_grace_time=3600
+    )
     scheduler.start()
     app.run(debug=True, use_reloader=False)
